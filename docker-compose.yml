@@ -1,0 +1,31 @@
+version: '3.8'
+
+networks:
+  controleazul-net:
+    name: controleazul-net
+    driver: bridge
+
+services:
+  controleazul-db:
+    image: 'mysql:8.0'
+    container_name: container-controleazul-db
+    restart: "always"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_controleazul
+      MYSQL_USER: user_controleazul
+      MYSQL_PASSWORD: root
+    volumes:
+      - controleazul_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - controleazul-net
+
+volumes:
+  controleazul_mysql_data:
