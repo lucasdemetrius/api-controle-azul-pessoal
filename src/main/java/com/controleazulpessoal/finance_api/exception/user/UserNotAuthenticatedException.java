@@ -6,7 +6,7 @@ public class UserNotAuthenticatedException extends RuntimeException implements H
     private static final String ERROR_CODE = "USER_AUTH_FAILED";
 
     public UserNotAuthenticatedException() {
-        super("Falha na autenticação. Verifique suas credenciais.");
+        super("authentication-failed-credentials.");
     }
 
     @Override
