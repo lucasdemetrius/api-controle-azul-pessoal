@@ -2,12 +2,18 @@ spring:
   application:
     name: finance-api
 
+  # Esta linha permite que o Spring Boot leia seu arquivo .env automaticamente
+  config:
+    import: "optional:file:.env[.properties]"
+
+  # Configurações de conexão com o banco de dados MySQL
   datasource:
     url: jdbc:mysql://localhost:3306/db_controleazul?createDatabaseIfNotExist=true&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # Configurações do Hibernate/JPA
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,6 +23,14 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+# Configuração customizada para o Token JWT
+api:
+  security:
+    token:
+      # O Spring buscará o valor de JWT_SECRET dentro do seu arquivo .env
+      secret: ${JWT_SECRET}
+
+# Configurações gerais do servidor
 server:
   port: 8080
   error:
