@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "User", description = "User related operations")
 @RequestMapping(path = "/v1/user", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -28,5 +29,9 @@ public interface UserApi {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Update authenticated user profile")
     ResponseEntity<UserResponse> update(@RequestBody UpdateUserRequest request);
+
+    @PostMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(description = "Upload user profile image")
+    ResponseEntity<UserResponse> uploadProfileImage(@RequestPart("file") MultipartFile file);
 
 }
