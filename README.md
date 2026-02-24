@@ -1,4 +1,4 @@
-# 🟦 Controle Azul - API Financeira
+# 🟦 Controle Azul - API Financeira pessoal
 
 API para App controle de finanças pessoais, desenvolvida com foco em **Clean Architecture**, **SOLID** e escalabilidade.
 

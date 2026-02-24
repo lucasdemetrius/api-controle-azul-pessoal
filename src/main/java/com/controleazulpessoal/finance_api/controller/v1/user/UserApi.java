@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.controller.v1.user;
 
 import com.controleazulpessoal.finance_api.controller.v1.user.request.CreateUserRequest;
+import com.controleazulpessoal.finance_api.controller.v1.user.request.UpdateUserRequest;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserDto;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,5 +24,9 @@ public interface UserApi {
     @GetMapping("/me")
     @Operation(description = "Get authenticated user profile")
     ResponseEntity<UserResponse> getMe();
+
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Update authenticated user profile")
+    ResponseEntity<UserResponse> update(@RequestBody UpdateUserRequest request);
 
 }
