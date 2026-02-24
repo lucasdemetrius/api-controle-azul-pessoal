@@ -37,4 +37,18 @@ public class S3StorageService {
             throw new RuntimeException("Erro ao converter arquivo para upload", e);
         }
     }
+
+    public void deleteFile(String fileKey) {
+        try {
+            software.amazon.awssdk.services.s3.model.DeleteObjectRequest deleteObjectRequest =
+                    software.amazon.awssdk.services.s3.model.DeleteObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileKey)
+                            .build();
+
+            s3Client.deleteObject(deleteObjectRequest);
+        } catch (Exception e) {
+            System.err.println("Erro ao deletar arquivo no S3: " + e.getMessage());
+        }
+    }
 }

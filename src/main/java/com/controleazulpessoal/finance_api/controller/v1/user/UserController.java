@@ -6,6 +6,7 @@ import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageServi
 import com.controleazulpessoal.finance_api.usecase.user.CreateUserUseCase;
 import com.controleazulpessoal.finance_api.usecase.user.GetAuthenticatedUserUseCase;
 import com.controleazulpessoal.finance_api.usecase.user.UpdateUserUseCase;
+import com.controleazulpessoal.finance_api.usecase.user.UploadUserProfileImageUseCase;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserDto;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class UserController implements UserApi {
     private final CreateUserUseCase createUserUseCase;
     private final GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
-    private final S3StorageService s3StorageService;
+    private final UploadUserProfileImageUseCase uploadUserProfileImageUseCase;
 
     @Override
     public ResponseEntity<UserDto> create(CreateUserRequest request) {
@@ -39,9 +40,7 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<UserResponse> uploadProfileImage(MultipartFile file) {
-        String fileKey = s3StorageService.uploadFile(file);
-
-        return ResponseEntity.ok(new UserResponse(null, "File uploaded: " + fileKey, null, null));
+        return ResponseEntity.ok(uploadUserProfileImageUseCase.execute(file));
     }
 
 
