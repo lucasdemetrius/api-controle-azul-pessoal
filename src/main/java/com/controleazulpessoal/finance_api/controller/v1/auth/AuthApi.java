@@ -10,4 +10,5 @@ public interface AuthApi {
 
     @PostMapping("/login")
     ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
+
 }

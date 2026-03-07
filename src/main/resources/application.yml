@@ -36,3 +36,5 @@ aws:
   secret-key: ${AWS_SECRET_ACCESS_KEY}
   s3:
     bucket: ${AWS_S3_BUCKET}
+  cloudfront:
+    url: ${AWS_CLOUDFRONT_URL}
