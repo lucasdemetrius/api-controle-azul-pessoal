@@ -1,4 +1,4 @@
-package com.controleazulpessoal.finance_api.infrastructure.configuration;
+package com.controleazulpessoal.finance_api.infrastructure.configuration.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

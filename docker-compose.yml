@@ -27,5 +27,18 @@ services:
     networks:
       - controleazul-net
 
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: container-controleazul-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"   # Porta do protocolo AMQP (o que o Java usa)
+      - "15672:15672" # Porta do Dashboard (acesso via browser)
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - controleazul-net
+
 volumes:
   controleazul_mysql_data:

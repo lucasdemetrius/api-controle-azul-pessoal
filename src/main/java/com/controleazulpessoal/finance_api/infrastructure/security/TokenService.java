@@ -24,7 +24,10 @@ public class TokenService {
 
         return Jwts.builder()
                 .setSubject(user.getId().toString())
+                .claim("userId", user.getId().toString())
                 .claim("email", user.getEmail())
+                .claim("phone", user.getPhoneNumber())
+                .claim("profileImage", user.getImageProfile())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -45,5 +48,14 @@ public class TokenService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public Claims getClaims(String token) {
+        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
