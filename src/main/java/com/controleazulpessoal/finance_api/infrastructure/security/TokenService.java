@@ -34,22 +34,6 @@ public class TokenService {
                 .compact();
     }
 
-    public String validateToken(String token) {
-        try {
-            Key key = Keys.hmacShaKeyFor(secret.getBytes());
-
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return claims.getSubject();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public Claims getClaims(String token) {
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
         return Jwts.parserBuilder()

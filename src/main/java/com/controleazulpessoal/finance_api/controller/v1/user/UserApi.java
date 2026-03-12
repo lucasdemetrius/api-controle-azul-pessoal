@@ -24,14 +24,17 @@ public interface UserApi {
 
     @GetMapping("/me")
     @Operation(description = "Get authenticated user profile")
+    @ResponseStatus(value = HttpStatus.OK)
     ResponseEntity<UserResponse> getMe();
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Update authenticated user profile")
+    @ResponseStatus(value = HttpStatus.OK)
     ResponseEntity<UserResponse> update(@RequestBody UpdateUserRequest request);
 
     @PostMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "Upload user profile image")
+    @ResponseStatus(value = HttpStatus.OK)
     ResponseEntity<UserResponse> uploadProfileImage(@RequestPart("file") MultipartFile file);
 
 }

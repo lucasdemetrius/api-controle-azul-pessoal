@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
+import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
@@ -28,8 +29,13 @@ public class CreateTransactionUseCase {
     @Transactional
     public TransactionDto execute(CreateTransactionRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(CategoryNotFoundException::new);
+
+        if (!category.getUser().getId().equals(user.getId())) {
+            throw new ForbiddenActionException("You don't have permission to use this category.");
+        }
 
         Transaction mainTransaction = Transaction.builder()
                 .id(request.getId() != null ? request.getId() : UUID.randomUUID())

@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.controller.v1.category;
 
 import com.controleazulpessoal.finance_api.controller.v1.category.request.CategoryRequest;
+import com.controleazulpessoal.finance_api.controller.v1.category.request.UpdateCategoryRequest;
 import com.controleazulpessoal.finance_api.response.Response;
 import com.controleazulpessoal.finance_api.usecase.category.output.CategoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,7 @@ public interface CategoryApi {
 
     @GetMapping
     @Operation(description = "List all categories of the authenticated user")
+    @ResponseStatus(value = HttpStatus.OK)
     ResponseEntity<Response<Page<CategoryDto>>> getAll(@PageableDefault(size = 10, sort = "name") Pageable pageable);
 
     @DeleteMapping("/{id}")
@@ -36,5 +38,6 @@ public interface CategoryApi {
 
     @PutMapping("/{id}")
     @Operation(description = "Update an existing category")
-    ResponseEntity<Response<CategoryDto>> update(@PathVariable UUID id, @RequestBody @Valid CategoryRequest request);
+    @ResponseStatus(value = HttpStatus.OK)
+    ResponseEntity<Response<CategoryDto>> update(@PathVariable UUID id, @RequestBody UpdateCategoryRequest request);
 }
