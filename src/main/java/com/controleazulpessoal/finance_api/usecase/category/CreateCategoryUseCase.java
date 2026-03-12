@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.category;
 
 import com.controleazulpessoal.finance_api.controller.v1.category.request.CategoryRequest;
+import com.controleazulpessoal.finance_api.exception.category.CategoryAlreadyExistsException;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
@@ -25,7 +26,7 @@ public class CreateCategoryUseCase {
                 .getPrincipal();
 
         if (categoryRepository.existsByNameAndUser(request.getName(), authenticatedUser)) {
-            throw new RuntimeException("Category with this name already exists for this user.");
+            throw new CategoryAlreadyExistsException();
         }
 
         Category category = Category.builder()

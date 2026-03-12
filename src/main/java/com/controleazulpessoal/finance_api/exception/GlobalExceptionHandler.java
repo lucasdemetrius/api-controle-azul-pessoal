@@ -1,5 +1,9 @@
 package com.controleazulpessoal.finance_api.exception;
 
+import com.controleazulpessoal.finance_api.exception.category.CategoryAlreadyExistsException;
+import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.exception.user.UserAlreadyExistsException;
 import com.controleazulpessoal.finance_api.exception.user.UserNotAuthenticatedException;
 import com.controleazulpessoal.finance_api.exception.user.UserNotFoundException;
@@ -31,6 +35,34 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "user-not-found", ex);
     }
 
+    // Categoria já existe
+    @ExceptionHandler(CategoryAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<Map<String, Object>> handleCategoryAlreadyExistsException(CategoryAlreadyExistsException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, "category-already-exists", ex);
+    }
+
+    // Categoria não encontrada
+    @ExceptionHandler(CategoryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Map<String, Object>> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "category-not-found", ex);
+    }
+
+    // Transação não encontrada
+    @ExceptionHandler(TransactionNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Map<String, Object>> handleTransactionNotFoundException(TransactionNotFoundException ex) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "transaction-not-found", ex);
+    }
+
+    // Transação negada
+    @ExceptionHandler(TransactionAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Map<String, Object>> handleTransactionAccessDeniedException(TransactionAccessDeniedException ex) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "transaction-access-denied", ex);
+    }
+
     // Requisição inválida (400 - Bad Request) para erros de argumento ilegal
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -50,6 +82,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Map<String, Object>> handleUsuarioNaoAutenticadoException(UserNotAuthenticatedException ex) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, "authentication-failed", ex);
+    }
+
+    // Falha de excpetion generalizada
+    @ExceptionHandler(ForbiddenActionException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Map<String, Object>> handleForbiddenActionException(ForbiddenActionException ex) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "forbidden-action", ex);
     }
 
     // Método auxiliar para criar respostas padronizadas

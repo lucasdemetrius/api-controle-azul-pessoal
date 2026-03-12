@@ -1,5 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
@@ -19,11 +21,12 @@ public class DeleteTransactionUseCase {
     public void execute(UUID id) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Transaction transaction = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(TransactionNotFoundException::new);
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Permission denied");
+            throw new TransactionAccessDeniedException();
         }
+
         repository.delete(transaction);
     }
 }
