@@ -3,6 +3,7 @@ package com.controleazulpessoal.finance_api.usecase.category;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
+import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class DeleteCategoryUseCase {
 
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public void execute(UUID id) {
@@ -22,13 +24,15 @@ public class DeleteCategoryUseCase {
                 .getAuthentication()
                 .getPrincipal();
 
-        // Busca a categoria e verifica se existe
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found."));
 
-        // Segurança: Verifica se o usuário logado é o dono da categoria
         if (!category.getUser().getId().equals(authenticatedUser.getId())) {
             throw new RuntimeException("You don't have permission to delete this category.");
+        }
+
+        if (transactionRepository.existsByCategory(category)) {
+            throw new RuntimeException("Cannot delete category with existing transactions.");
         }
 
         categoryRepository.delete(category);

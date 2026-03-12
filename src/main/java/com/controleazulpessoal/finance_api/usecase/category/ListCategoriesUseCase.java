@@ -5,6 +5,8 @@ import com.controleazulpessoal.finance_api.persistence.repository.CategoryReposi
 import com.controleazulpessoal.finance_api.usecase.category.mapper.CategoryMapper;
 import com.controleazulpessoal.finance_api.usecase.category.output.CategoryDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +20,12 @@ public class ListCategoriesUseCase {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    public List<CategoryDto> execute() {
-        // Recupera o usuário autenticado para filtrar a busca
+    public Page<CategoryDto> execute(Pageable pageable) {
         User authenticatedUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        // Busca apenas as categorias pertencentes a este usuário
-        return categoryRepository.findAllByUser(authenticatedUser)
-                .stream()
-                .map(categoryMapper::entityToDto)
-                .collect(Collectors.toList());
+        return categoryRepository.findAllByUser(authenticatedUser, pageable)
+                .map(categoryMapper::entityToDto);
     }
 }

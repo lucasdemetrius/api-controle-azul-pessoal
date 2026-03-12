@@ -20,33 +20,29 @@ public class S3StorageService {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
-    public String uploadFile(MultipartFile file) {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    // Agora aceita um prefixo (pasta)
+    public String uploadFile(MultipartFile file, String folder) {
+        String fileName = folder + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key("profiles/" + fileName)
+                    .key(fileName)
                     .contentType(file.getContentType())
                     .build();
 
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
 
-            return "profiles/" + fileName;
+            return fileName; // Retorna o caminho completo (key)
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao converter arquivo para upload", e);
+            throw new RuntimeException("Erro ao processar arquivo para upload no S3", e);
         }
     }
 
     public void deleteFile(String fileKey) {
+        if (fileKey == null || fileKey.isEmpty()) return;
         try {
-            software.amazon.awssdk.services.s3.model.DeleteObjectRequest deleteObjectRequest =
-                    software.amazon.awssdk.services.s3.model.DeleteObjectRequest.builder()
-                            .bucket(bucketName)
-                            .key(fileKey)
-                            .build();
-
-            s3Client.deleteObject(deleteObjectRequest);
+            s3Client.deleteObject(d -> d.bucket(bucketName).key(fileKey));
         } catch (Exception e) {
             System.err.println("Erro ao deletar arquivo no S3: " + e.getMessage());
         }
