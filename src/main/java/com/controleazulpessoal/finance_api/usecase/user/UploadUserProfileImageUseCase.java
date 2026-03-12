@@ -24,7 +24,7 @@ public class UploadUserProfileImageUseCase {
             s3StorageService.deleteFile(currentUser.getImageProfile());
         }
 
-        String newFileKey = s3StorageService.uploadFile(file);
+        String newFileKey = s3StorageService.uploadFile(file, "profiles");
 
         currentUser.setImageProfile(newFileKey);
         userRepository.save(currentUser);

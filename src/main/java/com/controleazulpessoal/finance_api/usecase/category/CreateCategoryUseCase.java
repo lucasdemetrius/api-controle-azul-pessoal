@@ -20,18 +20,14 @@ public class CreateCategoryUseCase {
 
     @Transactional
     public CategoryDto execute(CategoryRequest request) {
-        // 1. Recupera o usuário logado do contexto de segurança
-        // O seu SecurityFilter coloca o objeto User lá
         User authenticatedUser = (User) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        // 2. Validação opcional: Evitar duplicidade de nome para o mesmo usuário
         if (categoryRepository.existsByNameAndUser(request.getName(), authenticatedUser)) {
             throw new RuntimeException("Category with this name already exists for this user.");
         }
 
-        // 3. Mapeia Request para Entity e associa o usuário
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -40,7 +36,6 @@ public class CreateCategoryUseCase {
                 .user(authenticatedUser)
                 .build();
 
-        // 4. Salva e retorna o DTO
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.entityToDto(savedCategory);
     }

@@ -1,16 +1,19 @@
 package com.controleazulpessoal.finance_api.controller.v1.category;
 
 import com.controleazulpessoal.finance_api.controller.v1.category.request.CategoryRequest;
+import com.controleazulpessoal.finance_api.response.Response;
 import com.controleazulpessoal.finance_api.usecase.category.output.CategoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Category", description = "Finance categories management")
@@ -20,11 +23,11 @@ public interface CategoryApi {
     @PostMapping
     @Operation(description = "Create a new category for the authenticated user")
     @ResponseStatus(value = HttpStatus.CREATED)
-    ResponseEntity<CategoryDto> create(@RequestBody @Valid CategoryRequest request);
+    ResponseEntity<Response<CategoryDto>> create(@RequestBody @Valid CategoryRequest request);
 
     @GetMapping
     @Operation(description = "List all categories of the authenticated user")
-    ResponseEntity<List<CategoryDto>> getAll();
+    ResponseEntity<Response<Page<CategoryDto>>> getAll(@PageableDefault(size = 10, sort = "name") Pageable pageable);
 
     @DeleteMapping("/{id}")
     @Operation(description = "Delete a category")
@@ -33,5 +36,5 @@ public interface CategoryApi {
 
     @PutMapping("/{id}")
     @Operation(description = "Update an existing category")
-    ResponseEntity<CategoryDto> update(@PathVariable UUID id, @RequestBody @Valid CategoryRequest request);
+    ResponseEntity<Response<CategoryDto>> update(@PathVariable UUID id, @RequestBody @Valid CategoryRequest request);
 }
