@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.controller.v1.transaction;
 
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
+import com.controleazulpessoal.finance_api.controller.v1.transaction.request.UpdateTransactionRequest;
 import com.controleazulpessoal.finance_api.response.Response;
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,11 +40,13 @@ public interface TransactionApi {
 
     @PutMapping("/{id}")
     @Operation(description = "Update an existing transaction")
-    ResponseEntity<Response<TransactionDto>> update(@PathVariable UUID id, @RequestBody @Valid CreateTransactionRequest request);
+    @ResponseStatus(value = HttpStatus.OK)
+    ResponseEntity<Response<TransactionDto>> update(@PathVariable UUID id, @RequestBody UpdateTransactionRequest request);
 
     @PatchMapping("/{id}/receipt")
     @Operation(description = "Upload a receipt for a transaction")
+    @ResponseStatus(value = HttpStatus.OK)
     ResponseEntity<Response<TransactionDto>> uploadReceipt(
             @PathVariable UUID id,
-            @RequestParam("file") MultipartFile file);
+            @RequestPart("file") MultipartFile file);
 }

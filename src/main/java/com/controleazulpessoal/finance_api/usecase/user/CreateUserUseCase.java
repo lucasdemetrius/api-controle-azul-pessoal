@@ -59,6 +59,19 @@ public class CreateUserUseCase {
         return  userMapper.entityToDto(savedUser);
     }
 
+    public UserDto executeAndNotify(CreateUserRequest request) {
+        UserDto userDto = execute(request);
+
+        try {
+            WelcomeEmailEvent event = new WelcomeEmailEvent(userDto.name(), userDto.email());
+            rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_WELCOME_EMAIL, event);
+        } catch (Exception e) {
+            System.err.println("Falha ao enviar evento de boas-vindas: " + e.getMessage());
+        }
+
+        return userDto;
+    }
+
     private void createDefaultCategories(User user) {
         List<Category> defaultCategories = List.of(
                 Category.builder().name("Alimentação").icon("restaurant").color("#9C27B0").user(user).build(),

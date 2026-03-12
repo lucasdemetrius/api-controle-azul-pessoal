@@ -1,10 +1,14 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
-import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
+import com.controleazulpessoal.finance_api.controller.v1.transaction.request.UpdateTransactionRequest;
+import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
+import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
+import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
+import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import com.controleazulpessoal.finance_api.usecase.transaction.mapper.TransactionMapper;
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
@@ -19,10 +23,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UpdateTransactionUseCase {
     private final TransactionRepository repository;
+    private final CategoryRepository categoryRepository;
     private final TransactionMapper mapper;
 
     @Transactional
-    public TransactionDto execute(UUID id, CreateTransactionRequest request) {
+    public TransactionDto execute(UUID id, UpdateTransactionRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Transaction transaction = repository.findById(id)
                 .orElseThrow(TransactionNotFoundException::new);
@@ -31,14 +36,26 @@ public class UpdateTransactionUseCase {
             throw new TransactionAccessDeniedException();
         }
 
-        transaction.setAmount(request.getAmount());
-        transaction.setDescription(request.getDescription());
-        transaction.setTransactionDate(request.getTransactionDate());
-        transaction.setType(request.getType());
+        if (request.amount() != null) transaction.setAmount(request.amount());
+        if (request.description() != null) transaction.setDescription(request.description());
+        if (request.transactionDate() != null) transaction.setTransactionDate(request.transactionDate());
+        if (request.type() != null) transaction.setType(request.type());
+        if (request.recurrenceCount() != null) transaction.setRecurrenceCount(request.recurrenceCount());
+        if (request.frequency() != null) transaction.setFrequency(request.frequency());
+
         transaction.setFixed(request.isFixed());
         transaction.setRecurring(request.isRecurring());
-        transaction.setRecurrenceCount(request.getRecurrenceCount());
-        transaction.setFrequency(request.getFrequency());
+
+        if (request.categoryId() != null) {
+            Category category = categoryRepository.findById(request.categoryId())
+                    .orElseThrow(CategoryNotFoundException::new);
+
+            if (!category.getUser().getId().equals(user.getId())) {
+                throw new ForbiddenActionException("You don't have permission to use this category.");
+            }
+
+            transaction.setCategory(category);
+        }
 
         return mapper.entityToDto(repository.save(transaction));
     }

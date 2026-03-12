@@ -2,7 +2,6 @@ package com.controleazulpessoal.finance_api.controller.v1.user;
 
 import com.controleazulpessoal.finance_api.controller.v1.user.request.CreateUserRequest;
 import com.controleazulpessoal.finance_api.controller.v1.user.request.UpdateUserRequest;
-import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageService;
 import com.controleazulpessoal.finance_api.usecase.user.CreateUserUseCase;
 import com.controleazulpessoal.finance_api.usecase.user.GetAuthenticatedUserUseCase;
 import com.controleazulpessoal.finance_api.usecase.user.UpdateUserUseCase;
@@ -10,6 +9,7 @@ import com.controleazulpessoal.finance_api.usecase.user.UploadUserProfileImageUs
 import com.controleazulpessoal.finance_api.usecase.user.output.UserDto;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +25,7 @@ public class UserController implements UserApi {
 
     @Override
     public ResponseEntity<UserDto> create(CreateUserRequest request) {
-        return ResponseEntity.ok(createUserUseCase.execute(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(createUserUseCase.executeAndNotify(request));
     }
 
     @Override

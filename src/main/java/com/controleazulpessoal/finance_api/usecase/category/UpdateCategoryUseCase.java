@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.category;
 
 import com.controleazulpessoal.finance_api.controller.v1.category.request.CategoryRequest;
+import com.controleazulpessoal.finance_api.controller.v1.category.request.UpdateCategoryRequest;
 import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
@@ -21,7 +22,7 @@ public class UpdateCategoryUseCase {
     private final CategoryMapper categoryMapper;
 
     @Transactional
-    public CategoryDto execute(UUID id, CategoryRequest request) {
+    public CategoryDto execute(UUID id, UpdateCategoryRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
 
@@ -29,10 +30,10 @@ public class UpdateCategoryUseCase {
             throw new ForbiddenActionException("You don't have permission to update this category.");
         }
 
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
-        category.setColor(request.getColor());
-        category.setIcon(request.getIcon());
+        if (request.name() != null) category.setName(request.name());
+        if (request.description() != null) category.setDescription(request.description());
+        if (request.color() != null) category.setColor(request.color());
+        if (request.icon() != null) category.setIcon(request.icon());
 
         return categoryMapper.entityToDto(categoryRepository.save(category));
     }

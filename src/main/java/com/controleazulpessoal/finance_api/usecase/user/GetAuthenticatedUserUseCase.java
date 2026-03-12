@@ -27,7 +27,6 @@ public class GetAuthenticatedUserUseCase {
             fullPath = cloudFrontUrl + "/" + user.getImageProfile();
         }
 
-        assert user != null;
         return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())

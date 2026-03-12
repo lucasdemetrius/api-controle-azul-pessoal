@@ -23,7 +23,7 @@ server:
     include-message: always
 
 ---
-# --- PERFIL: DESENVOLVIMENTO (LOCAL) ---
+# PERFIL: DESENVOLVIMENTO (LOCAL)
 spring:
   config:
     activate:
@@ -33,6 +33,14 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
   rabbitmq:
     host: localhost
     port: 5672
@@ -40,7 +48,7 @@ spring:
     password: admin
 
 ---
-# --- PERFIL: PRODUÇÃO (AWS) ---
+# PERFIL: PRODUÇÃO (AWS)
 spring:
   config:
     activate:
@@ -65,7 +73,6 @@ spring:
     password: ${RABBITMQ_PASSWORD:admin}
 
 ---
-# Configurações que funcionam para ambos os ambientes
 api:
   security:
     token:

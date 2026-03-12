@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.controller.v1.transaction;
 
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
+import com.controleazulpessoal.finance_api.controller.v1.transaction.request.UpdateTransactionRequest;
 import com.controleazulpessoal.finance_api.response.Response;
 import com.controleazulpessoal.finance_api.usecase.transaction.*;
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
@@ -41,7 +42,7 @@ public class TransactionController implements TransactionApi {
     }
 
     @Override
-    public ResponseEntity<Response<TransactionDto>> update(UUID id, CreateTransactionRequest request) {
+    public ResponseEntity<Response<TransactionDto>> update(UUID id, UpdateTransactionRequest request) {
         return ResponseEntity.ok(Response.of(updateTransactionUseCase.execute(id, request)));
     }
 
