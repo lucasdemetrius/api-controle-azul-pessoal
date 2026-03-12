@@ -1,5 +1,8 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
+import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageService;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
@@ -25,19 +28,19 @@ public class UploadTransactionReceiptUseCase {
     @Transactional
     public TransactionDto execute(UUID transactionId, MultipartFile file) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Ajuste: Substituído por TransactionNotFoundException
         Transaction transaction = repository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(TransactionNotFoundException::new);
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Permission denied");
+            throw new TransactionAccessDeniedException();
         }
 
-        // Deleta o anterior se existir
         if (transaction.getAttachmentUrl() != null && !transaction.getAttachmentUrl().isEmpty()) {
             s3StorageService.deleteFile(transaction.getAttachmentUrl());
         }
 
-        // Faz o novo upload na pasta "receipts"
         String newFileKey = s3StorageService.uploadFile(file, "receipts");
 
         transaction.setAttachmentUrl(newFileKey);

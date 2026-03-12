@@ -1,6 +1,8 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
+import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
@@ -23,10 +25,10 @@ public class UpdateTransactionUseCase {
     public TransactionDto execute(UUID id, CreateTransactionRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Transaction transaction = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(TransactionNotFoundException::new);
 
         if (!transaction.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Permission denied");
+            throw new TransactionAccessDeniedException();
         }
 
         transaction.setAmount(request.getAmount());
