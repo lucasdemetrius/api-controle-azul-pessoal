@@ -2,6 +2,7 @@ package com.controleazulpessoal.finance_api.exception;
 
 import com.controleazulpessoal.finance_api.exception.category.CategoryAlreadyExistsException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
+import com.controleazulpessoal.finance_api.exception.file.InvalidFileException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.exception.user.UserAlreadyExistsException;
@@ -61,6 +62,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<Map<String, Object>> handleTransactionAccessDeniedException(TransactionAccessDeniedException ex) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, "transaction-access-denied", ex);
+    }
+
+    // Verifica o formato do arquivo que é enviado
+    @ExceptionHandler(InvalidFileException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Map<String, Object>> handleInvalidFileException(InvalidFileException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "invalid-file", ex);
     }
 
     // Requisição inválida (400 - Bad Request) para erros de argumento ilegal

@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.usecase.user;
 
+import com.controleazulpessoal.finance_api.infrastructure.storage.FileValidator;
 import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageService;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.UserRepository;
@@ -17,6 +18,8 @@ public class UploadUserProfileImageUseCase {
     private final S3StorageService s3StorageService;
 
     public UserResponse execute(MultipartFile file) {
+        FileValidator.validateImage(file);
+
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
