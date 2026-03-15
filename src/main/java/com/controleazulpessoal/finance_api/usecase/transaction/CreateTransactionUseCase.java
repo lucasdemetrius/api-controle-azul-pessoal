@@ -12,6 +12,7 @@ import com.controleazulpessoal.finance_api.persistence.repository.TransactionRep
 import com.controleazulpessoal.finance_api.usecase.transaction.mapper.TransactionMapper;
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateTransactionUseCase {
@@ -29,11 +31,13 @@ public class CreateTransactionUseCase {
     @Transactional
     public TransactionDto execute(CreateTransactionRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Creating transaction for user: {}, type: {}", user.getId(), request.getType());
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(CategoryNotFoundException::new);
 
         if (!category.getUser().getId().equals(user.getId())) {
+            log.warn("User: {} attempted to use category: {} owned by another user", user.getId(), request.getCategoryId());
             throw new ForbiddenActionException("You don't have permission to use this category.");
         }
 
@@ -52,8 +56,10 @@ public class CreateTransactionUseCase {
                 .build();
 
         Transaction saved = repository.save(mainTransaction);
+        log.info("Transaction created successfully. id: {}, type: {}, amount: {}", saved.getId(), saved.getType(), saved.getAmount());
 
         if (request.isRecurring() && request.getRecurrenceCount() != null && request.getRecurrenceCount() > 1) {
+            log.info("Generating {} recurring transactions for transaction: {}", request.getRecurrenceCount() - 1, saved.getId());
             generateRecurringTransactions(saved, request);
         }
 
@@ -77,6 +83,7 @@ public class CreateTransactionUseCase {
                     .build();
             repository.save(child);
         }
+        log.info("Recurring transactions generated successfully for parent: {}", parent.getId());
     }
 
     private LocalDateTime calculateNextDate(LocalDateTime baseDate, RecurrenceFrequency frequency, int increment) {

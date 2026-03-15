@@ -13,12 +13,14 @@ import com.controleazulpessoal.finance_api.persistence.repository.TransactionRep
 import com.controleazulpessoal.finance_api.usecase.transaction.mapper.TransactionMapper;
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UpdateTransactionUseCase {
@@ -29,10 +31,13 @@ public class UpdateTransactionUseCase {
     @Transactional
     public TransactionDto execute(UUID id, UpdateTransactionRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Updating transaction: {} for user: {}", id, user.getId());
+
         Transaction transaction = repository.findById(id)
                 .orElseThrow(TransactionNotFoundException::new);
 
         if (!transaction.getUser().getId().equals(user.getId())) {
+            log.warn("User: {} attempted to update transaction: {} owned by another user", user.getId(), id);
             throw new TransactionAccessDeniedException();
         }
 
@@ -51,12 +56,16 @@ public class UpdateTransactionUseCase {
                     .orElseThrow(CategoryNotFoundException::new);
 
             if (!category.getUser().getId().equals(user.getId())) {
+                log.warn("User: {} attempted to use category: {} owned by another user", user.getId(), request.categoryId());
                 throw new ForbiddenActionException("You don't have permission to use this category.");
             }
 
             transaction.setCategory(category);
+            log.info("Category updated to: {} for transaction: {}", request.categoryId(), id);
         }
 
-        return mapper.entityToDto(repository.save(transaction));
+        TransactionDto result = mapper.entityToDto(repository.save(transaction));
+        log.info("Transaction updated successfully. id: {}", id);
+        return result;
     }
 }

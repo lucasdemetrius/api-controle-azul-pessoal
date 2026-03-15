@@ -12,6 +12,7 @@ import com.controleazulpessoal.finance_api.usecase.user.output.UserDto;
 import com.controleazulpessoal.finance_api.usecase.user.output.WelcomeEmailEvent;
 import com.controleazulpessoal.finance_api.util.PasswordUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateUserUseCase {
@@ -31,8 +33,10 @@ public class CreateUserUseCase {
 
     @Transactional
     public UserDto execute(CreateUserRequest request) {
+        log.info("Creating user for email: {}", request.getEmail());
 
         if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("User creation failed — email already exists: {}", request.getEmail());
             throw new UserAlreadyExistsException();
         }
 
@@ -50,13 +54,12 @@ public class CreateUserUseCase {
                 .build();
 
         User savedUser = userRepository.save(user);
-
-        WelcomeEmailEvent event = new WelcomeEmailEvent(user.getName(), user.getEmail());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_WELCOME_EMAIL, event);
+        log.info("User created successfully. id: {}", savedUser.getId());
 
         createDefaultCategories(savedUser);
+        log.info("Default categories created for user: {}", savedUser.getId());
 
-        return  userMapper.entityToDto(savedUser);
+        return userMapper.entityToDto(savedUser);
     }
 
     public UserDto executeAndNotify(CreateUserRequest request) {
@@ -65,8 +68,9 @@ public class CreateUserUseCase {
         try {
             WelcomeEmailEvent event = new WelcomeEmailEvent(userDto.name(), userDto.email());
             rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_WELCOME_EMAIL, event);
+            log.info("Welcome email event sent for user: {}", userDto.email());
         } catch (Exception e) {
-            System.err.println("Falha ao enviar evento de boas-vindas: " + e.getMessage());
+            log.error("Failed to send welcome email for user: {}. Error: {}", userDto.email(), e.getMessage());
         }
 
         return userDto;
@@ -89,8 +93,6 @@ public class CreateUserUseCase {
                 Category.builder().name("Viagem").icon("flight").color("#00BCD4").user(user).build(),
                 Category.builder().name("Outros").icon("more_horiz").color("#000000").user(user).build()
         );
-
         categoryRepository.saveAll(defaultCategories);
     }
-
 }
