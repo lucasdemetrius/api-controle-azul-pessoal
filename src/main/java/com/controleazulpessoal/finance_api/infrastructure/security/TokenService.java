@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -17,7 +18,8 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    private static final long EXPIRATION_TIME = 7200000;
+    private static final long ACCESS_TOKEN_EXPIRATION = 7200000;
+    private static final long REFRESH_TOKEN_EXPIRATION = 604800000;
 
     public String generateToken(User user) {
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
@@ -29,7 +31,19 @@ public class TokenService {
                 .claim("phone", user.getPhoneNumber())
                 .claim("profileImage", user.getImageProfile())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(User user) {
+        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+
+        return Jwts.builder()
+                .setSubject(user.getId().toString())
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

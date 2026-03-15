@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.controleazulpessoal.finance_api.exception.auth.RefreshTokenExpiredException;
+import com.controleazulpessoal.finance_api.exception.auth.RefreshTokenInvalidException;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -69,6 +72,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> handleInvalidFileException(InvalidFileException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "invalid-file", ex);
+    }
+
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Map<String, Object>> handleRefreshTokenExpiredException(RefreshTokenExpiredException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "refresh-token-expired", ex);
+    }
+
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Map<String, Object>> handleRefreshTokenInvalidException(RefreshTokenInvalidException ex) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "refresh-token-invalid", ex);
     }
 
     // Requisição inválida (400 - Bad Request) para erros de argumento ilegal
