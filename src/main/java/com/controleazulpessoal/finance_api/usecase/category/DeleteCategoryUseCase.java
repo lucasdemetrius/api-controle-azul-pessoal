@@ -7,11 +7,14 @@ import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeleteCategoryUseCase {
@@ -21,9 +24,13 @@ public class DeleteCategoryUseCase {
     @Transactional
     public void execute(UUID id) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
+        log.info("Soft deleting category: {} for user: {}", id, user.getId());
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(CategoryNotFoundException::new);
 
         if (!category.getUser().getId().equals(user.getId())) {
+            log.warn("User: {} attempted to delete category: {} owned by another user", user.getId(), id);
             throw new ForbiddenActionException("You don't have permission to delete this category.");
         }
 
@@ -32,5 +39,6 @@ public class DeleteCategoryUseCase {
         }
 
         categoryRepository.delete(category);
+        log.info("Category soft deleted successfully. id: {}", id);
     }
 }

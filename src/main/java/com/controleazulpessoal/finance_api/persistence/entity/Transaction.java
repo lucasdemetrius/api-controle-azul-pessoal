@@ -4,6 +4,9 @@ import com.controleazulpessoal.finance_api.persistence.enums.RecurrenceFrequency
 import com.controleazulpessoal.finance_api.persistence.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +18,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE transactions SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Transaction {
 
     @Id
@@ -52,6 +57,9 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     private RecurrenceFrequency frequency;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @PrePersist
     public void ensureId() {
