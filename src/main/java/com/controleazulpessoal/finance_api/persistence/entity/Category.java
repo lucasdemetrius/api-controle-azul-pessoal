@@ -2,7 +2,10 @@ package com.controleazulpessoal.finance_api.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -12,6 +15,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE categories SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Category {
 
     @Id
@@ -24,12 +29,15 @@ public class Category {
     private String description;
 
     @Column(nullable = false)
-    private String color; // Ex: #9C27B0 (Roxo da imagem)
+    private String color;
 
     @Column(nullable = false)
-    private String icon; // Ex: "restaurant", "directions_car", "checkroom"
+    private String icon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }
