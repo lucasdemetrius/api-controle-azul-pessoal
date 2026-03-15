@@ -17,7 +17,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     Page<Transaction> findAllByUserOrderByTransactionDateDesc(User user, Pageable pageable);
 
-    List<Transaction> findAllByUserAndTransactionDateBetween(User user, LocalDateTime start, LocalDateTime end);
+    Page<Transaction> findAllByUserAndTransactionDateBetweenOrderByTransactionDateDesc(
+            User user, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     boolean existsByCategory(Category category);
 
