@@ -11,12 +11,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Tag(name = "Transaction", description = "Finance transactions management")
@@ -31,6 +33,13 @@ public interface TransactionApi {
     @GetMapping
     @Operation(description = "List all transactions of the authenticated user")
     ResponseEntity<Response<Page<TransactionDto>>> getAll(
+            @PageableDefault(size = 20, sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable);
+
+    @GetMapping("/filter")
+    @Operation(description = "List transactions by period")
+    ResponseEntity<Response<Page<TransactionDto>>> getByPeriod(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
             @PageableDefault(size = 20, sort = "transactionDate", direction = Sort.Direction.DESC) Pageable pageable);
 
     @DeleteMapping("/{id}")

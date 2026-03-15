@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +22,7 @@ public class TransactionController implements TransactionApi {
 
     private final CreateTransactionUseCase createTransactionUseCase;
     private final ListTransactionsUseCase listTransactionsUseCase;
+    private final ListTransactionsByPeriodUseCase listTransactionsByPeriodUseCase;
     private final DeleteTransactionUseCase deleteTransactionUseCase;
     private final UpdateTransactionUseCase updateTransactionUseCase;
     private final UploadTransactionReceiptUseCase uploadTransactionReceiptUseCase;
@@ -33,6 +35,12 @@ public class TransactionController implements TransactionApi {
     @Override
     public ResponseEntity<Response<Page<TransactionDto>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(Response.of(listTransactionsUseCase.execute(pageable)));
+    }
+
+    @Override
+    public ResponseEntity<Response<Page<TransactionDto>>> getByPeriod(
+            LocalDateTime start, LocalDateTime end, Pageable pageable) {
+        return ResponseEntity.ok(Response.of(listTransactionsByPeriodUseCase.execute(start, end, pageable)));
     }
 
     @Override
