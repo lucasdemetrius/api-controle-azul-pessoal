@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.persistence.entity;
 
+import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.persistence.enums.RecurrenceFrequency;
 import com.controleazulpessoal.finance_api.persistence.enums.TransactionType;
 import jakarta.persistence.*;
@@ -65,6 +66,16 @@ public class Transaction {
     public void ensureId() {
         if (this.id == null) {
             this.id = UUID.randomUUID();
+        }
+    }
+
+    public boolean isOwnedBy(User user) {
+        return this.user.getId().equals(user.getId());
+    }
+
+    public void validateOwnership(User user) {
+        if (!isOwnedBy(user)) {
+            throw new ForbiddenActionException("You don't have permission to perform this action.");
         }
     }
 }

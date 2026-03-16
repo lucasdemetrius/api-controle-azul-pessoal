@@ -28,9 +28,7 @@ public class UpdateCategoryUseCase {
 
         Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
 
-        if (!category.getUser().getId().equals(user.getId())) {
-            throw new ForbiddenActionException("You don't have permission to update this category.");
-        }
+        category.validateOwnership(user);
 
         if (request.name() != null) category.setName(request.name());
         if (request.description() != null) category.setDescription(request.description());

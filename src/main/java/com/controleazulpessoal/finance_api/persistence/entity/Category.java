@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.persistence.entity;
 
+import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -40,4 +41,14 @@ public class Category {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public boolean isOwnedBy(User user) {
+        return this.user.getId().equals(user.getId());
+    }
+
+    public void validateOwnership(User user) {
+        if (!isOwnedBy(user)) {
+            throw new ForbiddenActionException("You don't have permission to perform this action.");
+        }
+    }
 }

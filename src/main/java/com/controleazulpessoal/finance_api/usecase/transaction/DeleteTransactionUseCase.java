@@ -1,6 +1,5 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
-import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
@@ -8,7 +7,6 @@ import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +29,7 @@ public class DeleteTransactionUseCase {
         Transaction transaction = repository.findById(id)
                 .orElseThrow(TransactionNotFoundException::new);
 
-        if (!transaction.getUser().getId().equals(user.getId())) {
-            log.warn("User: {} attempted to delete transaction: {} owned by another user", user.getId(), id);
-            throw new TransactionAccessDeniedException();
-        }
+        transaction.validateOwnership(user);
 
         repository.delete(transaction);
         log.info("Transaction deleted successfully. id: {}", id);
