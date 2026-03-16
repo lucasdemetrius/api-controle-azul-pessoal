@@ -9,7 +9,6 @@ import com.controleazulpessoal.finance_api.persistence.repository.CategoryReposi
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +26,12 @@ public class DeleteCategoryUseCase {
     @Transactional
     public void execute(UUID id) {
         User user = authProvider.getAuthenticatedUser();
-
         log.info("Soft deleting category: {} for user: {}", id, user.getId());
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        if (!category.getUser().getId().equals(user.getId())) {
-            log.warn("User: {} attempted to delete category: {} owned by another user", user.getId(), id);
-            throw new ForbiddenActionException("You don't have permission to delete this category.");
-        }
+        category.validateOwnership(user);
 
         if (transactionRepository.existsByCategory(category)) {
             throw new ForbiddenActionException("Cannot delete category with existing transactions.");

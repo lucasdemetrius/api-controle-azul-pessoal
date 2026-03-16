@@ -1,6 +1,5 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
-import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.infrastructure.storage.FileValidator;
@@ -12,7 +11,6 @@ import com.controleazulpessoal.finance_api.usecase.transaction.mapper.Transactio
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,10 +38,7 @@ public class UploadTransactionReceiptUseCase {
         Transaction transaction = repository.findById(transactionId)
                 .orElseThrow(TransactionNotFoundException::new);
 
-        if (!transaction.getUser().getId().equals(user.getId())) {
-            log.warn("User: {} attempted to upload receipt for transaction: {} owned by another user", user.getId(), transactionId);
-            throw new TransactionAccessDeniedException();
-        }
+        transaction.validateOwnership(user);
 
         if (transaction.getAttachmentUrl() != null && !transaction.getAttachmentUrl().isEmpty()) {
             log.info("Deleting old receipt for transaction: {}", transactionId);

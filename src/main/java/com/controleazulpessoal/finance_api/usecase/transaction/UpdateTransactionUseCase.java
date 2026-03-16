@@ -1,9 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.UpdateTransactionRequest;
-import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
-import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
 import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
@@ -15,7 +13,6 @@ import com.controleazulpessoal.finance_api.usecase.transaction.mapper.Transactio
 import com.controleazulpessoal.finance_api.usecase.transaction.output.TransactionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +37,7 @@ public class UpdateTransactionUseCase {
         Transaction transaction = repository.findById(id)
                 .orElseThrow(TransactionNotFoundException::new);
 
-        if (!transaction.getUser().getId().equals(user.getId())) {
-            log.warn("User: {} attempted to update transaction: {} owned by another user", user.getId(), id);
-            throw new TransactionAccessDeniedException();
-        }
+        transaction.validateOwnership(user);
 
         if (request.amount() != null) transaction.setAmount(request.amount());
         if (request.description() != null) transaction.setDescription(request.description());
@@ -59,10 +53,7 @@ public class UpdateTransactionUseCase {
             Category category = categoryRepository.findById(request.categoryId())
                     .orElseThrow(CategoryNotFoundException::new);
 
-            if (!category.getUser().getId().equals(user.getId())) {
-                log.warn("User: {} attempted to use category: {} owned by another user", user.getId(), request.categoryId());
-                throw new ForbiddenActionException("You don't have permission to use this category.");
-            }
+            category.validateOwnership(user);
 
             transaction.setCategory(category);
             log.info("Category updated to: {} for transaction: {}", request.categoryId(), id);
