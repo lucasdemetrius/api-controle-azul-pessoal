@@ -31,30 +31,28 @@ public class UpdateTransactionUseCase {
     @Transactional
     public TransactionDto execute(UUID id, UpdateTransactionRequest request) {
         User user = authProvider.getAuthenticatedUser();
-
         log.info("Updating transaction: {} for user: {}", id, user.getId());
 
         Transaction transaction = repository.findById(id)
                 .orElseThrow(TransactionNotFoundException::new);
 
         transaction.validateOwnership(user);
-
-        if (request.amount() != null) transaction.setAmount(request.amount());
-        if (request.description() != null) transaction.setDescription(request.description());
-        if (request.transactionDate() != null) transaction.setTransactionDate(request.transactionDate());
-        if (request.type() != null) transaction.setType(request.type());
-        if (request.recurrenceCount() != null) transaction.setRecurrenceCount(request.recurrenceCount());
-        if (request.frequency() != null) transaction.setFrequency(request.frequency());
-
-        transaction.setFixed(request.isFixed());
-        transaction.setRecurring(request.isRecurring());
+        transaction.update(
+                request.amount(),
+                request.description(),
+                request.transactionDate(),
+                request.type(),
+                request.recurrenceCount(),
+                request.frequency(),
+                request.isFixed(),
+                request.isRecurring()
+        );
 
         if (request.categoryId() != null) {
             Category category = categoryRepository.findById(request.categoryId())
                     .orElseThrow(CategoryNotFoundException::new);
 
             category.validateOwnership(user);
-
             transaction.setCategory(category);
             log.info("Category updated to: {} for transaction: {}", request.categoryId(), id);
         }

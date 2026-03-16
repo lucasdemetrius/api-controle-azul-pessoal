@@ -51,4 +51,11 @@ public class Category {
             throw new ForbiddenActionException("You don't have permission to perform this action.");
         }
     }
+
+    public void update(String name, String description, String color, String icon) {
+        if (name != null) this.name = name;
+        if (description != null) this.description = description;
+        if (color != null) this.color = color;
+        if (icon != null) this.icon = icon;
+    }
 }
