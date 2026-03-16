@@ -78,4 +78,17 @@ public class Transaction {
             throw new ForbiddenActionException("You don't have permission to perform this action.");
         }
     }
+
+    public void update(BigDecimal amount, String description, LocalDateTime transactionDate,
+                       TransactionType type, Integer recurrenceCount,
+                       RecurrenceFrequency frequency, boolean isFixed, boolean isRecurring) {
+        if (amount != null) this.amount = amount;
+        if (description != null) this.description = description;
+        if (transactionDate != null) this.transactionDate = transactionDate;
+        if (type != null) this.type = type;
+        if (recurrenceCount != null) this.recurrenceCount = recurrenceCount;
+        if (frequency != null) this.frequency = frequency;
+        this.isFixed = isFixed;
+        this.isRecurring = isRecurring;
+    }
 }

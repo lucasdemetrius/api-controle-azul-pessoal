@@ -10,10 +10,12 @@ import com.controleazulpessoal.finance_api.persistence.repository.CategoryReposi
 import com.controleazulpessoal.finance_api.usecase.category.mapper.CategoryMapper;
 import com.controleazulpessoal.finance_api.usecase.category.output.CategoryDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UpdateCategoryUseCase {
@@ -25,16 +27,21 @@ public class UpdateCategoryUseCase {
     @Transactional
     public CategoryDto execute(UUID id, UpdateCategoryRequest request) {
         User user = authProvider.getAuthenticatedUser();
+        log.info("Updating category: {} for user: {}", id, user.getId());
 
-        Category category = categoryRepository.findById(id).orElseThrow(CategoryNotFoundException::new);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(CategoryNotFoundException::new);
 
         category.validateOwnership(user);
+        category.update(
+                request.name(),
+                request.description(),
+                request.color(),
+                request.icon()
+        );
 
-        if (request.name() != null) category.setName(request.name());
-        if (request.description() != null) category.setDescription(request.description());
-        if (request.color() != null) category.setColor(request.color());
-        if (request.icon() != null) category.setIcon(request.icon());
-
-        return categoryMapper.entityToDto(categoryRepository.save(category));
+        CategoryDto result = categoryMapper.entityToDto(categoryRepository.save(category));
+        log.info("Category updated successfully. id: {}", id);
+        return result;
     }
 }
