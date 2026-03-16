@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import com.controleazulpessoal.finance_api.usecase.transaction.mapper.TransactionMapper;
@@ -20,9 +21,11 @@ public class ListTransactionsByPeriodUseCase {
 
     private final TransactionRepository repository;
     private final TransactionMapper mapper;
+    private final AuthenticatedUserProvider authProvider;
 
     public Page<TransactionDto> execute(LocalDateTime start, LocalDateTime end, Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Listing transactions for user: {} between {} and {}", user.getId(), start, end);
 
         Page<TransactionDto> result = repository

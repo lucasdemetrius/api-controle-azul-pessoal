@@ -2,6 +2,7 @@ package com.controleazulpessoal.finance_api.usecase.transaction;
 
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
@@ -17,11 +18,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DeleteTransactionUseCase {
+
     private final TransactionRepository repository;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public void execute(UUID id) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Deleting transaction: {} for user: {}", id, user.getId());
 
         Transaction transaction = repository.findById(id)

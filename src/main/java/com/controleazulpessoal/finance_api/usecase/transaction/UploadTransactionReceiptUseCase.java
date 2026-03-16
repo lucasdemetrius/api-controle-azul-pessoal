@@ -2,6 +2,7 @@ package com.controleazulpessoal.finance_api.usecase.transaction;
 
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.infrastructure.storage.FileValidator;
 import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageService;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
@@ -26,12 +27,14 @@ public class UploadTransactionReceiptUseCase {
     private final TransactionRepository repository;
     private final S3StorageService s3StorageService;
     private final TransactionMapper mapper;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public TransactionDto execute(UUID transactionId, MultipartFile file) {
         FileValidator.validateReceipt(file);
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Uploading receipt for transaction: {}, user: {}", transactionId, user.getId());
 
         Transaction transaction = repository.findById(transactionId)

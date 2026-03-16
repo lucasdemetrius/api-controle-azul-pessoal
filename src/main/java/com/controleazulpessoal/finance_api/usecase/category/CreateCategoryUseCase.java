@@ -2,13 +2,13 @@ package com.controleazulpessoal.finance_api.usecase.category;
 
 import com.controleazulpessoal.finance_api.controller.v1.category.request.CategoryRequest;
 import com.controleazulpessoal.finance_api.exception.category.CategoryAlreadyExistsException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
 import com.controleazulpessoal.finance_api.usecase.category.mapper.CategoryMapper;
 import com.controleazulpessoal.finance_api.usecase.category.output.CategoryDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +18,13 @@ public class CreateCategoryUseCase {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public CategoryDto execute(CategoryRequest request) {
-        User authenticatedUser = (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
 
-        if (categoryRepository.existsByNameAndUser(request.getName(), authenticatedUser)) {
+        if (categoryRepository.existsByNameAndUser(request.getName(), user)) {
             throw new CategoryAlreadyExistsException();
         }
 
@@ -34,7 +33,7 @@ public class CreateCategoryUseCase {
                 .description(request.getDescription())
                 .color(request.getColor())
                 .icon(request.getIcon())
-                .user(authenticatedUser)
+                .user(user)
                 .build();
 
         Category savedCategory = categoryRepository.save(category);

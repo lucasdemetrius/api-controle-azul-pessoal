@@ -1,6 +1,7 @@
 package com.controleazulpessoal.finance_api.usecase.user;
 
 import com.controleazulpessoal.finance_api.controller.v1.user.request.UpdateUserRequest;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.UserRepository;
 import com.controleazulpessoal.finance_api.usecase.user.output.UserResponse;
@@ -13,26 +14,28 @@ import org.springframework.stereotype.Service;
 public class UpdateUserUseCase {
 
     private final UserRepository userRepository;
+    private final AuthenticatedUserProvider authProvider;
 
     public UserResponse execute(UpdateUserRequest request){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+
+        User user = authProvider.getAuthenticatedUser();
 
         if (request.name() != null){
-            currentUser.setName(request.name());
+            user.setName(request.name());
         }
 
         if (request.phoneNumber() != null) {
-            currentUser.setPhoneNumber(request.phoneNumber());
+            user.setPhoneNumber(request.phoneNumber());
         }
 
-        userRepository.save(currentUser);
+        userRepository.save(user);
 
         return UserResponse.builder()
-                .id(currentUser.getId())
-                .name(currentUser.getName())
-                .email(currentUser.getEmail())
-                .profileImageUrl(currentUser.getImageProfile())
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .profileImageUrl(user.getImageProfile())
                 .build();
     }
 

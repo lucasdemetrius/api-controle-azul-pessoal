@@ -5,6 +5,7 @@ import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionAccessDeniedException;
 import com.controleazulpessoal.finance_api.exception.transaction.TransactionNotFoundException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
@@ -24,13 +25,16 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UpdateTransactionUseCase {
+
     private final TransactionRepository repository;
     private final CategoryRepository categoryRepository;
     private final TransactionMapper mapper;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public TransactionDto execute(UUID id, UpdateTransactionRequest request) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Updating transaction: {} for user: {}", id, user.getId());
 
         Transaction transaction = repository.findById(id)

@@ -2,6 +2,7 @@ package com.controleazulpessoal.finance_api.usecase.category;
 
 import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.CategoryRepository;
@@ -18,12 +19,15 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DeleteCategoryUseCase {
+
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public void execute(UUID id) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Soft deleting category: {} for user: {}", id, user.getId());
 
         Category category = categoryRepository.findById(id)

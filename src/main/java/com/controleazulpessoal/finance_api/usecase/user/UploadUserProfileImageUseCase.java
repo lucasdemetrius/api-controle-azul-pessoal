@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.usecase.user;
 
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.infrastructure.storage.FileValidator;
 import com.controleazulpessoal.finance_api.infrastructure.storage.S3StorageService;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
@@ -16,26 +17,28 @@ public class UploadUserProfileImageUseCase {
 
     private final UserRepository userRepository;
     private final S3StorageService s3StorageService;
+    private final AuthenticatedUserProvider authProvider;
 
     public UserResponse execute(MultipartFile file) {
         FileValidator.validateImage(file);
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
 
-        if (currentUser.getImageProfile() != null && !currentUser.getImageProfile().isEmpty()) {
-            s3StorageService.deleteFile(currentUser.getImageProfile());
+        User user = authProvider.getAuthenticatedUser();
+
+        if (user.getImageProfile() != null && !user.getImageProfile().isEmpty()) {
+            s3StorageService.deleteFile(user.getImageProfile());
         }
 
         String newFileKey = s3StorageService.uploadFile(file, "profiles");
 
-        currentUser.setImageProfile(newFileKey);
-        userRepository.save(currentUser);
+        user.setImageProfile(newFileKey);
+        userRepository.save(user);
 
         return UserResponse.builder()
-                .id(currentUser.getId())
-                .name(currentUser.getName())
-                .email(currentUser.getEmail())
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
                 .profileImageUrl(newFileKey)
                 .build();
     }

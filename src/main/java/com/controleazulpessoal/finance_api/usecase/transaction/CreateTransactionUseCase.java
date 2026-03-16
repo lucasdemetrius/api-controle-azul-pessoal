@@ -3,6 +3,7 @@ package com.controleazulpessoal.finance_api.usecase.transaction;
 import com.controleazulpessoal.finance_api.controller.v1.transaction.request.CreateTransactionRequest;
 import com.controleazulpessoal.finance_api.exception.ForbiddenActionException;
 import com.controleazulpessoal.finance_api.exception.category.CategoryNotFoundException;
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.Category;
 import com.controleazulpessoal.finance_api.persistence.entity.Transaction;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
@@ -24,13 +25,16 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CreateTransactionUseCase {
+
     private final TransactionRepository repository;
     private final CategoryRepository categoryRepository;
     private final TransactionMapper mapper;
+    private final AuthenticatedUserProvider authProvider;
 
     @Transactional
     public TransactionDto execute(CreateTransactionRequest request) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         log.info("Creating transaction for user: {}, type: {}", user.getId(), request.getType());
 
         Category category = categoryRepository.findById(request.getCategoryId())
