@@ -1,5 +1,6 @@
 package com.controleazulpessoal.finance_api.usecase.transaction;
 
+import com.controleazulpessoal.finance_api.infrastructure.security.AuthenticatedUserProvider;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.TransactionRepository;
 import com.controleazulpessoal.finance_api.usecase.transaction.mapper.TransactionMapper;
@@ -13,11 +14,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ListTransactionsUseCase {
+
     private final TransactionRepository repository;
     private final TransactionMapper mapper;
+    private final AuthenticatedUserProvider authProvider;
 
     public Page<TransactionDto> execute(Pageable pageable) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authProvider.getAuthenticatedUser();
+
         return repository.findAllByUserOrderByTransactionDateDesc(user, pageable)
                 .map(mapper::entityToDto);
     }
