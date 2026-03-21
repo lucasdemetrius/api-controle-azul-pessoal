@@ -4,6 +4,8 @@ import com.controleazulpessoal.finance_api.exception.user.UserNotFoundException;
 import com.controleazulpessoal.finance_api.persistence.entity.User;
 import com.controleazulpessoal.finance_api.persistence.repository.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,15 +34,38 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = this.recoverToken(request);
 
         if (token != null) {
-            Claims claims = tokenService.getClaims(token);
+            try {
+                Claims claims = tokenService.getClaims(token);
 
-            String userId = claims.getSubject();
+                String userId = claims.getSubject();
 
-            User user = userRepository.findById(UUID.fromString(userId))
-                    .orElseThrow(UserNotFoundException::new);
+                User user = userRepository.findById(UUID.fromString(userId))
+                        .orElseThrow(UserNotFoundException::new);
 
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            } catch (ExpiredJwtException e) {
+                // Token expirado — retorna 401 para o frontend tratar o refresh
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"token-expired\", \"message\": \"Token expirado\"}");
+                return;
+
+            } catch (JwtException e) {
+                // Token inválido
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"token-invalid\", \"message\": \"Token inválido\"}");
+                return;
+
+            } catch (UserNotFoundException e) {
+                // Usuário não encontrado
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"user-not-found\", \"message\": \"Usuário não encontrado\"}");
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -51,5 +76,4 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (authHeader == null) return null;
         return authHeader.replace("Bearer ", "");
     }
-
 }

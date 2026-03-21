@@ -18,7 +18,7 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    private static final long ACCESS_TOKEN_EXPIRATION = 300000;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1800000;
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000;
 
     public String generateToken(User user) {
